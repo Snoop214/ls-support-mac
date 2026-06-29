@@ -18,8 +18,10 @@ jobs:
       - run: npm install
 
       - run: npm run build
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - uses: actions/upload-artifact@v4
         with:
           name: LS-Support-Mac
-          path: dist/*.dmg
+          path: dist/*.zip

@@ -6,18 +6,16 @@
   "author": "Soe Naing",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --mac dmg"
+    "build": "electron-builder --mac zip"
   },
   "build": {
     "appId": "com.talabat.ls-support",
     "productName": "LS-Support",
     "mac": {
-      "target": "dmg",
+      "target": "zip",
       "icon": "icon_1024.png",
+      "identity": null,
       "category": "public.app-category.business"
-    },
-    "dmg": {
-      "artifactName": "LS-Support.dmg"
     },
     "files": [
       "main.js",
