@@ -1,0 +1,35 @@
+﻿{
+  "name": "ls-support",
+  "version": "3.5.0",
+  "description": "LS-Support - talabat Local Shops Operations",
+  "main": "main.js",
+  "author": "Soe Naing",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac dmg"
+  },
+  "build": {
+    "appId": "com.talabat.ls-support",
+    "productName": "LS-Support",
+    "mac": {
+      "target": "dmg",
+      "icon": "icon_1024.png",
+      "category": "public.app-category.business"
+    },
+    "dmg": {
+      "artifactName": "LS-Support.dmg"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "ai-chat.html",
+      "icon.png",
+      "icon.ico",
+      "icon_1024.png"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^33.4.0",
+    "electron-builder": "^25.1.8"
+  }
+}

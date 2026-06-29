@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AI Operations Assistant</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;height:100vh;display:flex;flex-direction:column;background:#F4F7F9;color:#1F2937}
+.header{background:linear-gradient(135deg,#FF5A00,#FF8C42);padding:16px 24px;color:#fff;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.header h1{font-size:18px;font-weight:800}
+.header span{font-size:12px;opacity:.8}
+.messages{flex:1;overflow-y:auto;padding:20px 24px}
+.msg{margin-bottom:14px;display:flex}
+.msg.user{justify-content:flex-end}
+.msg.user .bubble{background:#FF5A00;color:#fff;border-radius:16px 16px 4px 16px}
+.msg.ai .bubble{background:#fff;border:1px solid #E2E8F0;border-radius:16px 16px 16px 4px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.bubble{max-width:80%;padding:12px 18px;font-size:13px;line-height:1.7}
+.bubble table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.bubble th{background:#FFF5F0;color:#FF5A00;padding:6px 10px;text-align:left;border-bottom:2px solid #FF5A00;font-size:11px}
+.bubble td{padding:6px 10px;border-bottom:1px solid #F1F5F9}
+.bubble h4{color:#FF5A00;margin:12px 0 6px;font-size:14px}
+.bubble ul,.bubble ol{padding-left:20px;margin:6px 0}
+.actions{display:flex;gap:6px;margin-top:6px}
+.actions button{padding:4px 12px;background:#fff;border:1px solid #E2E8F0;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;color:#475569}
+.actions button:hover{background:#F8FAFC}
+.loading{display:flex;gap:4px;padding:12px 18px}
+.loading span{width:8px;height:8px;background:#FF5A00;border-radius:50%;animation:bounce .6s infinite alternate}
+.loading span:nth-child(2){animation-delay:.2s}
+.loading span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.welcome{text-align:center;padding:60px 20px}
+.welcome h2{font-size:20px;font-weight:800;color:#1F2937;margin-bottom:8px}
+.welcome p{color:#64748B;font-size:13px;margin-bottom:20px}
+.welcome .examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.welcome .examples button{padding:8px 16px;background:#fff;border:1px solid #E2E8F0;border-radius:20px;font-size:12px;color:#475569;cursor:pointer;font-family:Inter,sans-serif}
+.welcome .examples button:hover{border-color:#FF5A00;color:#FF5A00}
+.input-bar{padding:12px 24px;border-top:1px solid #E2E8F0;background:#fff;display:flex;gap:10px;flex-shrink:0}
+.input-bar input{flex:1;padding:12px 16px;border:1px solid #E2E8F0;border-radius:10px;font-size:14px;font-family:Inter,sans-serif;outline:none}
+.input-bar input:focus{border-color:#FF5A00}
+.input-bar button{padding:12px 20px;background:#FF5A00;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:16px}
+.input-bar button:hover{background:#E04E00}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>LS-Support</h1>
+  <span>AI Operations Copilot | Powered by Gemini</span>
+</div>
+<div class="messages" id="messages">
+  <div class="welcome">
+    <div style="font-size:48px;margin-bottom:16px">&#129302;</div>
+    <h2>LS-Support — AI Operations Assistant</h2>
+    <p>Executive briefs, analytics, emails, charts — ask anything about Local Shops.</p>
+    <div class="examples">
+      <button onclick="send('Executive brief for Darshan territory')">Darshan Brief</button>
+      <button onclick="send('Compare LuLu vs Viva with chart')">LuLu vs Viva</button>
+      <button onclick="send('WoW report for all supervisors')">Weekly Report</button>
+      <button onclick="send('Top 5 worst stores by OOS%')">Worst OOS</button>
+      <button onclick="send('Draft email about OOS improvement')">Draft Email</button>
+    </div>
+  </div>
+</div>
+<div class="input-bar">
+  <input type="text" id="input" placeholder="Ask about performance, supervisors, chains..." onkeydown="if(event.key==='Enter')send()">
+  <button onclick="send()">&#9993;</button>
+</div>
+<script>
+var msgCount=0;
+function send(text){
+  var input=document.getElementById('input');
+  var msg=text||input.value.trim();
+  if(!msg)return;
+  input.value='';
+  var container=document.getElementById('messages');
+  var welcome=container.querySelector('.welcome');
+  if(welcome)welcome.remove();
+
+  // User message
+  var userDiv=document.createElement('div');
+  userDiv.className='msg user';
+  userDiv.innerHTML='<div class="bubble">'+msg.replace(/</g,'&lt;')+'</div>';
+  container.appendChild(userDiv);
+
+  // Loading
+  var loadDiv=document.createElement('div');
+  loadDiv.className='msg ai';
+  loadDiv.id='loading';
+  loadDiv.innerHTML='<div class="loading"><span></span><span></span><span></span></div>';
+  container.appendChild(loadDiv);
+  container.scrollTop=container.scrollHeight;
+
+  // Call AI via Electron
+  window.ai.send(msg).then(function(response){
+    var ld=document.getElementById('loading');
+    if(ld)ld.remove();
+    msgCount++;
+    var div=document.createElement('div');
+    div.className='msg ai';
+    div.id='aiMsg'+msgCount;
+    div.innerHTML='<div><div class="bubble">'+response+'</div><div class="actions"><button onclick="copyText(\'aiMsg'+msgCount+'\')">Copy</button><button onclick="printMsg(\'aiMsg'+msgCount+'\')">PDF</button></div></div>';
+    container.appendChild(div);
+    container.scrollTop=container.scrollHeight;
+  }).catch(function(err){
+    var ld=document.getElementById('loading');
+    if(ld)ld.remove();
+    var div=document.createElement('div');
+    div.className='msg ai';
+    div.innerHTML='<div class="bubble" style="border-color:#FECACA;background:#FEF2F2;color:#DC2626">Error: '+err.message+'</div>';
+    container.appendChild(div);
+    container.scrollTop=container.scrollHeight;
+  });
+}
+function copyText(id){
+  var el=document.getElementById(id);
+  if(el){navigator.clipboard.writeText(el.querySelector('.bubble').innerText);alert('Copied!')}
+}
+function printMsg(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var w=window.open('','_blank');
+  w.document.write('<html><head><title>LS Report</title><style>body{font-family:Inter,Arial,sans-serif;padding:30px;color:#1F2937;max-width:800px;margin:0 auto}table{width:100%;border-collapse:collapse;margin:10px 0}th{background:#FFF5F0;color:#FF5A00;padding:6px 10px;text-align:left;border-bottom:2px solid #FF5A00;font-size:12px}td{padding:6px 10px;border-bottom:1px solid #F1F5F9;font-size:12px}h4{color:#FF5A00}</style></head><body><h2 style="color:#FF5A00">LS Operations Report</h2><p style="color:#64748B;font-size:12px">'+new Date().toLocaleString()+'</p><hr>'+el.querySelector('.bubble').innerHTML+'</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print()},500);
+}
+</script>
+</body>
+</html>

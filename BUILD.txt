@@ -1,0 +1,17 @@
+﻿HOW TO BUILD LS-SUPPORT FOR MAC
+================================
+
+Requirements: macOS with Node.js installed
+
+Steps:
+1. Open Terminal
+2. cd to this folder
+3. Run these 2 commands:
+
+   npm install
+   npm run build
+
+4. The LS-Support.dmg will appear in the "dist" folder
+5. Share that .dmg file with Mac users
+
+That is it!
